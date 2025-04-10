@@ -1,4 +1,3 @@
-// index.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -9,11 +8,20 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 const authRoutes = require('./routes/auth');
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/order');
+const cartRoutes = require('./routes/cart');
+const adminOrderRoutes = require('./routes/adminOrder');
+
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/admin/orders', adminOrderRoutes);
 
-
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 app.get('/', (req, res) => {
   res.send('API is running...');

@@ -7,7 +7,8 @@ exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ username, email, password: hashed });
-    res.status(201).json(user);
+    await user.save();
+    res.status(201).json({ message: 'User registered successfully.' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -15,18 +16,15 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) throw new Error('User not found');
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) return res.status(400).json({ message: 'Invalid username or password' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new Error('Wrong password');
+    if (!isMatch) return res.status(400).json({ message: 'Invalid username or password' });
 
-    const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
-      expiresIn: '7d'
-    });
-
-    res.json({ token, user: { username: user.username, isAdmin: user.isAdmin } });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    res.json({ token });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
